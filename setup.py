@@ -17,9 +17,9 @@ packages = ['camote']
 requires = ['redis']
 
 setup(
-    name='camote',
+    name='camote-queue',
     version=camote.__version__,
-    description='Python based queue on top of Redis.',
+    description='Redis based queue that supports fetching job position.',
     author='Marconi Moreto',
     author_email='caketoad@gmail.com',
     url='https://github.com/marconi/camote-queue',
