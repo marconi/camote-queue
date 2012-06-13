@@ -65,9 +65,13 @@ class CamoteQueue(object):
         in-place and at the same time returns the same job. """
         if not isinstance(job, Job) or not job.id:
             raise Exception("Invalid Job")
-        index = self.redis_db.hget(self.queue_index_id, job.id)
-        job.position = -1 if not index else int(index) + 1
+        job.position = self.get_position_by_id(job.id)
         return job
+
+    def get_position_by_id(self, job_id):
+        """ Fetches position using job id. """
+        index = self.redis_db.hget(self.queue_index_id, job_id)
+        return -1 if not index else int(index) + 1
 
     def __unicode__(self):
         return '<CamoteQueue %s>' % self.queue_id
