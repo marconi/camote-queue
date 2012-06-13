@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 def atomic_push(redis_db, queue_id, item):
     """ Push item to queue and get queue updated length in

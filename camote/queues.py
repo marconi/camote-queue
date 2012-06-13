@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import redis
 import uuid
 import pickle
