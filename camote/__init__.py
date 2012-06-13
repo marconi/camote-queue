@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 __title__ = 'camote'
-__version__ = '0.1.1'
+__version__ = '0.1.11'
 __author__ = 'Marconi Moreto'
 
 
