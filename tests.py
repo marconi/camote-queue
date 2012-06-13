@@ -62,6 +62,10 @@ class QueueTest(unittest.TestCase):
         job = self.queue.pop()
         self.assertEqual(job, None)
 
+    def test_invalid_job(self):
+        invalid_job = "foobar"
+        self.assertRaises(Exception, self.queue.get_job_position, invalid_job)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -50,6 +50,8 @@ class CamoteQueue(object):
 
     def get_job_position(self, job):
         """ Fetches index of a job and return its position. """
+        if not isinstance(job, Job) or not job.id:
+            raise Exception("Invalid Job")
         index = self.redis_db.hget(self.queue_index_id, job.id)
         if not index:
             return None
