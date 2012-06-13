@@ -11,6 +11,15 @@ class Job(object):
     def __init__(self, id, value):
         self.id = id
         self.value = value
+        self.position = -1
+
+    def __setattr__(self, name, value):
+        if name == 'position':
+            try:
+                value = int(value)
+            except ValueError:
+                raise AttributeError("Position needs to be an integer")
+        object.__setattr__(self, name, value)
 
     def __unicode__(self):
         return '<Job %s>' % self.id
@@ -31,7 +40,8 @@ class CamoteQueue(object):
                             self.queue_id,
                             pickle.dumps(job))
         self.redis_db.hset(self.queue_index_id, id, index)
-        return job, index + 1
+        job.position = index + 1
+        return job
 
     def pop(self):
         """ Pops the first item in the queue and return it. """
@@ -50,14 +60,14 @@ class CamoteQueue(object):
         pipe.execute()
         return job
 
-    def get_job_position(self, job):
-        """ Fetches index of a job and return its position. """
+    def update_job_position(self, job):
+        """ Fetches index of a job and update the job's position
+        in-place and at the same time returns the same job. """
         if not isinstance(job, Job) or not job.id:
             raise Exception("Invalid Job")
         index = self.redis_db.hget(self.queue_index_id, job.id)
-        if not index:
-            return None
-        return int(index) + 1
+        job.position = -1 if not index else int(index) + 1
+        return job
 
     def __unicode__(self):
         return '<CamoteQueue %s>' % self.queue_id

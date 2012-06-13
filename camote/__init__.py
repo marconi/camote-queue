@@ -6,4 +6,4 @@ __author__ = 'Marconi Moreto'
 
 
 from . import utils
-from .queues import CamoteQueue
+from .queues import Job, CamoteQueue
