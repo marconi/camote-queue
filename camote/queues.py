@@ -73,5 +73,13 @@ class CamoteQueue(object):
         index = self.redis_db.hget(self.queue_index_id, job_id)
         return -1 if not index else int(index) + 1
 
+    def get_job_by_position(self, position):
+        """ Fetches job at the 1 based position specified. """
+        pickled_job = self.redis_db.lindex(self.queue_id, position - 1)
+        if pickled_job:
+            return pickle.loads(pickled_job)
+        else:
+            return None
+
     def __unicode__(self):
         return '<CamoteQueue %s>' % self.queue_id

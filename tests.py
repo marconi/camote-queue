@@ -75,6 +75,13 @@ class QueueTest(unittest.TestCase):
         invalid_job = "foobar"
         self.assertRaises(Exception, self.queue.update_job_position, invalid_job)
 
+    def test_get_job_by_position(self):
+        items = ['iPad', 'Cinema Display', 'Mountain Bike']
+        for i, item in enumerate(items):
+            job = self.queue.push(item)
+            position = self.queue.get_position_by_id(job.id)
+            self.assertEqual(self.queue.get_job_by_position(position).id, job.id)
+
 
 class JobTest(unittest.TestCase):
     def test_set_position(self):
