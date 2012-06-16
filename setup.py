@@ -20,6 +20,8 @@ setup(
     name='camote-queue',
     version=camote.__version__,
     description='Redis based queue that supports fetching job position.',
+    long_description=open('README.rst').read() + '\n\n' +
+                     open('HISTORY.rst').read(),
     author='Marconi Moreto',
     author_email='caketoad@gmail.com',
     url='https://github.com/marconi/camote-queue',
