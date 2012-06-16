@@ -1,1 +1,1 @@
-include LICENSE tests.py
+include LICENSE HISTORY README.rst tests.py
