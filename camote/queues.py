@@ -78,6 +78,12 @@ class CamoteQueue(object):
         pipe.execute()
         return job
 
+    def size(self):
+        """
+        Return number of jobs in queue.
+        """
+        return self.redis_db.llen(self.queue_id)
+
     def update_job_position(self, job):
         """
         Fetch index of a job and update the job's position

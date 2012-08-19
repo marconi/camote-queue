@@ -65,6 +65,16 @@ class QueueTest(unittest.TestCase):
         job = self.queue.pop()
         self.assertEqual(job, None)
 
+    def test_size(self):
+        items = [{'name': 'Macbook Pro', 'job': None},
+                 {'name': 'iPhone', 'job': None},
+                 {'name': 'iMac', 'job': None}]
+        for i, item in enumerate(items):
+            job = self.queue.push(item['name'])
+            items[i]['job'] = job
+
+        self.assertEqual(self.queue.size(), 3)
+
     def test_get_position_by_id(self):
         items = ['iPad', 'Cinema Display', 'Mountain Bike']
         for i, item in enumerate(items):
