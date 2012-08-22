@@ -2,6 +2,7 @@
 
 import uuid
 import pickle
+import simplejson
 
 from .utils import atomic_push
 
@@ -36,6 +37,7 @@ class CamoteQueue(object):
     def __init__(self, redis_db, queue_name):
         self.queue_id = 'camoteq:%s' % queue_name
         self.queue_index_id = 'camoteq:index:%s' % queue_name
+        self.queue_pubsub_id = 'camoteq:pubsub:%s' % queue_name
         self.redis_db = redis_db
 
     def push(self, item):
@@ -52,7 +54,14 @@ class CamoteQueue(object):
         # set the index of the newly pushed job
         self.redis_db.hset(self.queue_index_id, id, index)
 
+        # increment 1-based position
         job.position = index + 1
+
+        # publish push
+        self.redis_db.publish(
+            self.queue_pubsub_id,
+            simplejson.dumps({'type': 'PUSH', 'job_id': job.id}))
+
         return job
 
     def pop(self):
@@ -76,7 +85,21 @@ class CamoteQueue(object):
         for key in keys:
             pipe.hincrby(self.queue_index_id, key, amount=-1)
         pipe.execute()
+
+        # publish pop
+        self.redis_db.publish(
+            self.queue_pubsub_id,
+            simplejson.dumps({'type': 'POP', 'job_id': job.id}))
+
         return job
+
+    def subscribe(self):
+        """
+        Return pubsub object where consumers can listen for events.
+        """
+        pubsub = self.redis_db.pubsub()
+        pubsub.subscribe(self.queue_pubsub_id)
+        return pubsub
 
     def size(self):
         """

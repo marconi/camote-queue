@@ -14,7 +14,7 @@ if sys.argv[-1] == 'publish':
     sys.exit()
 
 packages = ['camote']
-requires = ['redis==2.4.13']
+requires = ['redis==2.4.13', 'simplejson==2.4.0']
 
 setup(
     name='camote-queue',

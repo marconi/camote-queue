@@ -1,9 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import logging
 import unittest
 import redis
 import camote
+import threading
+import simplejson
+import time
+
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger('Test')
 
 
 class QueueTest(unittest.TestCase):
@@ -91,6 +99,53 @@ class QueueTest(unittest.TestCase):
             job = self.queue.push(item)
             position = self.queue.get_position_by_id(job.id)
             self.assertEqual(self.queue.get_job_by_position(position).id, job.id)
+
+    def test_event_subscription(self):
+
+        class SubscriberRunner(threading.Thread):
+            def __init__(self, queue):
+                super(SubscriberRunner, self).__init__()
+                self.subscription = queue.subscribe()
+
+            def run(self):
+                for msg in self.subscription.listen():
+                    if msg['type'] == 'message':
+                        job = simplejson.loads(msg['data'])
+                        self.type = job['type']
+                        self.job_id = job['job_id']
+                        break
+
+        items = [{'name': 'Macbook Pro', 'job': None},
+                 {'name': 'iPhone', 'job': None},
+                 {'name': 'iMac', 'job': None}]
+
+        # test push
+        jobs = []
+        runners = []
+        for item in items:
+            sr = SubscriberRunner(self.queue)
+            sr.start()
+            runners.append(sr)
+            jobs.append(self.queue.push(item['name']))
+
+        for i, runner in enumerate(runners):
+            runner.join()
+            self.assertEqual(runner.job_id, jobs[i].id)
+            self.assertEqual(runner.type, 'PUSH')
+
+        # test pop
+        jobs = []
+        runners = []
+        for __ in range(len(jobs)):
+            sr = SubscriberRunner(self.queue)
+            sr.start()
+            runners.append(sr)
+            jobs.append(self.queue.pop())
+
+        for i, runner in enumerate(runners):
+            runner.join()
+            self.assertEqual(runner.job_id, jobs[i].id)
+            self.assertEqual(runner.type, 'POP')
 
 
 class JobTest(unittest.TestCase):

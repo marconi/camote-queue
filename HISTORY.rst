@@ -3,6 +3,11 @@
 History
 -------
 
+0.1.14 (2012-08-22)
++++++++++++++++++++
+- Added pubsub events on push and pop
+- Added ``subscribe`` queue method
+
 0.1.13 (2012-08-19)
 +++++++++++++++++++
 
