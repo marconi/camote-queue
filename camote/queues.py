@@ -93,6 +93,36 @@ class CamoteQueue(object):
 
         return job
 
+    def pop_job_by_position(self, position):
+        """
+        Pop job in queue that is in the `position`.
+        """
+        # get job from given position
+        job = self.get_job_by_position(position)
+
+        # get job index
+        job_index = self.redis_db.hget(self.queue_index_id, job.id)
+
+        # delete the job's index
+        self.redis_db.hdel(self.queue_index_id, job.id)
+
+        # get all keys whos index are <= job_index
+        keys = self.redis_db.hgetall(self.queue_index_id)
+
+        # delete job from queue
+        pipe = self.redis_db.pipeline()
+        pipe.lset(self.queue_id, job_index, None)  # mark to be deleted
+        pipe.lrem(self.queue_id, -1, None)  # delete it
+
+        # shift keys
+        for key, index in keys.items():
+            if index >= job_index:
+                pipe.hincrby(self.queue_index_id, key, amount=-1)
+
+        pipe.execute()
+
+        return job
+
     def subscribe(self):
         """
         Return pubsub object where consumers can listen for events.

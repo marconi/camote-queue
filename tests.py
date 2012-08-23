@@ -7,7 +7,6 @@ import redis
 import camote
 import threading
 import simplejson
-import time
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -146,6 +145,43 @@ class QueueTest(unittest.TestCase):
             runner.join()
             self.assertEqual(runner.job_id, jobs[i].id)
             self.assertEqual(runner.type, 'POP')
+
+    def test_pop_job_by_position(self):
+        items = [{'name': 'Macbook Pro', 'job': None},
+                 {'name': 'iPhone', 'job': None},
+                 {'name': 'iMac', 'job': None}]
+        for i, item in enumerate(items):
+            job = self.queue.push(item['name'])
+            items[i]['job'] = job
+
+        job = self.queue.pop_job_by_position(2)  # pop iPhone
+        self.assertEqual(self.queue.size(), 2)
+        self.assertEqual(job.value, 'iPhone')
+
+        keys = self.redis_db.hgetall(self.queue.queue_index_id)
+
+        for key, index in keys.items():
+            position = int(index) + 1
+            job = self.queue.get_job_by_position(position)
+            self.assertEqual(job.id, key)
+
+        job = self.queue.pop_job_by_position(2)  # pop iMac
+        self.assertEqual(self.queue.size(), 1)
+        self.assertEqual(job.value, 'iMac')
+
+        keys = self.redis_db.hgetall(self.queue.queue_index_id)
+
+        for key, index in keys.items():
+            position = int(index) + 1
+            job = self.queue.get_job_by_position(position)
+            self.assertEqual(job.id, key)
+
+        job = self.queue.pop_job_by_position(1)  # pop Macbook Pro
+        self.assertEqual(self.queue.size(), 0)
+        self.assertEqual(job.value, 'Macbook Pro')
+
+        keys = self.redis_db.hgetall(self.queue.queue_index_id)
+        self.assertEqual(len(keys), 0)
 
 
 class JobTest(unittest.TestCase):
