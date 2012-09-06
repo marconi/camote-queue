@@ -93,6 +93,13 @@ class CamoteQueue(object):
 
         return job
 
+    def clear(self):
+        """
+        Removes all the jobs in the queue.
+        """
+        while self.pop():
+            pass
+
     def pop_job_by_position(self, position):
         """
         Pop job in queue that is in the `position`.

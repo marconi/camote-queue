@@ -183,6 +183,17 @@ class QueueTest(unittest.TestCase):
         keys = self.redis_db.hgetall(self.queue.queue_index_id)
         self.assertEqual(len(keys), 0)
 
+    def test_clear(self):
+        items = [{'name': 'Macbook Pro', 'job': None},
+                 {'name': 'iPhone', 'job': None},
+                 {'name': 'iMac', 'job': None}]
+        for i, item in enumerate(items):
+            self.queue.push(item['name'])
+
+        self.assertEqual(self.queue.size(), 3)
+        self.queue.clear()
+        self.assertEqual(self.queue.size(), 0)
+
 
 class JobTest(unittest.TestCase):
     def test_set_position(self):
